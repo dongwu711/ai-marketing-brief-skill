@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Marketing Brief"
+  short_description: "查询已发布的每周 AI 营销简报、案例、工具与原文来源"
+  default_prompt: "Use $ai-marketing-brief to 查看本周已发布的 AI 营销简报，并附原文链接。"
