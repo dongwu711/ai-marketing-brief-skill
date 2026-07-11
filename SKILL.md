@@ -1,28 +1,41 @@
 ---
 name: ai-marketing-brief
-description: 查询 AI Marketing Brief 已发布的每周 AI 营销简报、行动建议、案例、工具与原始来源。用户提到“AI Marketing Brief”“AI 营销简报”“本周营销 AI”“营销 AI 案例”“查营销工具”“营销周报”或想查看 yingxiaoai.com.cn 的已发布内容时使用；也用于按关键词搜索该档案库。
+description: 查询 AI Marketing Brief 已发布的营销 AI 周刊、最近更新、案例、工具与原文来源。用户提到“AI Marketing Brief”“AI 营销简报”“营销 AI 简报”“今天营销 AI”“最近营销 AI”“营销 AI 案例”“AI 营销工具”“营销周报”“GEO”“AIGC 创意”或“营销自动化”时使用；也用于检索 yingxiaoai.com.cn 的已发布营销 AI 档案库。
 ---
 
 # AI Marketing Brief
 
-使用 `query.py` 读取 `yingxiaoai.com.cn` 已发布的公开数据。只读，不需要 API Key；每次查询都会重新读取公开接口，因此无需为新一期重新安装 Skill。
+使用 `query.py` 查询 `yingxiaoai.com.cn` 的已发布公开数据。只读、无需 API Key；候选、草稿与未部署期次不在结果范围内。
 
-## 查询方式
+## 路由
 
-- 最新期：`python3 query.py latest`
-- 指定日期：`python3 query.py issue --date YYYY-MM-DD`
-- 搜索档案库：`python3 query.py search --query "关键词"`（覆盖全部已发布的情报、案例与工具）
-- 只搜工具或案例：在搜索命令后加 `--type tool` 或 `--type case`
+- “本周 / 本期 / 周报 / 该知道什么 / 可以做什么” → `latest`。
+- “今天 / 最近 N 天 / 最近更新 / 新内容” → `feed --days N`；未写天数时默认 7 天。
+- “全部 / 档案库 / 历史案例 / 工具目录” → `archive`；仅当用户明确要全量时使用。
+- 品牌、行业、工具、渠道、GEO、AIGC 创意、营销自动化等具体问题 → `search`，并按用户条件加筛选。
 
-先用脚本返回的 `issue`、`information`、`actions` 和 `sources` 组织回答。用户问“本周”时，默认查询最新已发布期次；新一期一经发布并更新公开 API，下一次查询即会读取到。草案和未部署内容不在此 Skill 的数据范围内。
+不要把“来源数量”“验证等级”或“更新时间”称作热度。这里提供的是本期编辑精选和最近已审核更新，不是算法热搜榜。
+
+## 命令
+
+```bash
+python3 query.py latest
+python3 query.py issue --number 2
+python3 query.py issue --date 2026-07-13
+python3 query.py feed --days 3 --category aigc-creative
+python3 query.py archive --type case --market CN --min-verification L2
+python3 query.py search --query "小红书" --type intel
+```
+
+可用于 `feed`、`archive`、`search` 的筛选：`--type`（intel / case / tool / all）、`--category`（五大分类）、`--market`、`--min-verification`（L1–L4）和 `--take`。`search` 额外需要 `--query`。
 
 ## 输出规则
 
-1. 用中文给出简明结论和可执行建议；每条信息保留 `sources[].url` 的原文链接。
-2. 不把摘要当原文事实。需要引用数字、品牌表态或结论时，提醒用户回原文 URL 核对。
-3. 如实保留 `verification`：L1 是单一媒体/平台来源，不写成已被独立证实的行业规律。
-4. 默认只查一次，不轮询、不批量翻页；相同问题复用已取得的数据。
-5. 请求失败时说明“公开测试接口暂不可用”，不要编造内容或改用记忆补全。
+1. 用直接、业务人员看得懂的中文作答；不要展示 API 路径、参数、缓存或内部实现。
+2. 每条信息保留 `sources[].url` 原文链接和 `verification`。数字、品牌表态与结论引用前必须回原文核对。
+3. L1 是单一媒体、平台自述或服务商来源，不写成已被独立证实的行业规律；L0 不进入“最近已审核更新”。
+4. 用户问当天而滚动流没有内容时，如实说明“暂无新的已审核更新”，可补充最新周刊，不拿旧条目凑数。
+5. 每会话首次查询时，读取结果中的 `skill_update`；只有 `available: true` 才在最终回答末尾提示一次更新。查询失败时说明“公开测试接口暂不可用”，不要用记忆补全。
 
 每次面向用户的查询结果末尾都附上：
 
